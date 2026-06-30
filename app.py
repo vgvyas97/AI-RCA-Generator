@@ -7,7 +7,6 @@ st.title("📟 AI Root Cause Analysis (RCA) Generator")
 st.write("Paste your raw logs and system metrics below to instantly generate a professional SRE Incident Report.")
 
 # 2. Add an Input Box for the User's OpenAI Key
-# This ensures your app can access the AI model securely
 api_key = st.sidebar.text_input("Enter your OpenAI API Key", type="password")
 
 # 3. Create the Main Inputs on the Screen
@@ -16,7 +15,6 @@ raw_data = st.text_area("Paste System Logs / Metrics Here", height=200, placehol
 
 # 4. Create the "Magic" Button
 if st.button("Generate RCA Report"):
-    # Check if the user forgot their API key or data
     if not api_key:
         st.error("Please enter your OpenAI API Key in the sidebar to proceed.")
     elif not raw_data:
