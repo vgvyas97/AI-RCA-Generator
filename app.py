@@ -6,8 +6,8 @@ st.set_page_config(page_title="AI Root Cause Analysis Generator", page_icon="⚙
 st.title("📟 AI Root Cause Analysis (RCA) Generator")
 st.write("Paste your raw logs and system metrics below to instantly generate a professional SRE Incident Report.")
 
-# 2. Add an Input Box for the User's OpenAI Key
-api_key = st.sidebar.text_input("Enter your OpenAI API Key", type="password")
+# 2. Add an Input Box for the User's Google Gemini API Key
+api_key = st.sidebar.text_input("Enter your Gemini API Key", type="password")
 
 # 3. Create the Main Inputs on the Screen
 incident_title = st.text_input("Incident Title", placeholder="e.g., Payment Gateway 500 Errors")
@@ -16,14 +16,17 @@ raw_data = st.text_area("Paste System Logs / Metrics Here", height=200, placehol
 # 4. Create the "Magic" Button
 if st.button("Generate RCA Report"):
     if not api_key:
-        st.error("Please enter your OpenAI API Key in the sidebar to proceed.")
+        st.error("Please enter your Gemini API Key in the sidebar to proceed.")
     elif not raw_data:
         st.warning("Please paste some log or metric data first.")
     else:
         with st.spinner("Analyzing data and generating report..."):
             try:
-                # Connect to the OpenAI Engine
-                client = OpenAI(api_key=api_key)
+                # Connect to Google's Free Cloud Engine using OpenAI's format
+                client = OpenAI(
+                    api_key=api_key,
+                    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+                )
                 
                 # Formulate the instructions for the AI
                 system_instruction = (
@@ -33,9 +36,9 @@ if st.button("Generate RCA Report"):
                     "Executive Summary, Incident Timeline Hypothesis, Root Cause Determination, and Short/Long-term Preventative Actions."
                 )
                 
-                # Send the data to the AI model
+                # Send the data to the modern, active Gemini model
                 response = client.chat.completions.create(
-                    model="gpt-4o-mini",
+                    model="gemini-3.5-flash",
                     messages=[
                         {"role": "system", "content": system_instruction},
                         {"role": "user", "content": f"Incident: {incident_title}\n\nData:\n{raw_data}"}
