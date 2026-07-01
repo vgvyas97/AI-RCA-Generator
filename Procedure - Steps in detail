@@ -1,0 +1,210 @@
+# Engineering Log: Building the AI-Driven RCA Generator
+
+**Author & Engineer:** Vivek
+
+**Project:** Project 1 — Automating Root Cause Analysis (RCA)
+
+**System Environment:** macOS, Python 3, Streamlit, Google Gemini API
+
+---
+
+## Executive Summary & Core Philosophy
+
+This document serves as a comprehensive technical diary and procedural guide for the construction of the **AI-Driven RCA Generator**.
+
+As a network administration and IT operations professional transitioning into cloud-native automation, the core goal of this project was to solve a massive real-world operational bottleneck: **reducing Mean Time to Repair (MTTR)** by automating the synthesis of post-mortem incident logs into structured, executive-ready Markdown reports.
+
+Throughout this project, we purposely encountered, diagnosed, and resolved multiple infrastructure, terminal environment, and cloud API errors. This log documents every single technical hurdle and key learning milestone.
+
+---
+
+## Phase 1: Infrastructure & Environment Setup
+
+Every production-grade automation tool begins with building a clean workspace, both in the cloud and on the local machine.
+
+### 1. Version Control Setup (GitHub)
+
+* **Action:** Created a public repository named `ai-rca-generator`.
+* **Purpose:** Acts as a remote cloud directory for version control, code tracking, and visibility for technical stakeholders or hiring managers.
+* **Artifacts Created:** Initialized with a default `README.md` to document project delivery.
+
+### 2. Dependency Mapping (`requirements.txt`)
+
+Before writing code, engineers map out external libraries (toolboxes) required by the system.
+
+* **Action:** Created `requirements.txt` containing:
+```text
+streamlit==1.32.0
+openai==1.14.0
+
+```
+
+
+* **Why it matters:** `streamlit` abstracts frontend web UI creation using pure Python logic, while `openai` serves as the standardized client SDK framework used to communicate with LLM endpoints.
+
+### 3. Local Python & Environmental Path Routing
+
+* **The Process:** Downloaded and initialized Python 3 globally on macOS.
+* **The Environment Hurdle:** When attempting to run package installations, the terminal occasionally fails to locate executable binaries if the system environment variables are unmapped.
+* **The Lesson:** Instead of relying on raw command shortcuts which can be broken by local configuration states, wrapping execution calls directly inside the target binary path guarantees stability.
+* *Standard Command (Failed due to environmental path variance):* `pip install streamlit openai`
+* *Deterministic Production Command (Succeeded):* `python3 -m pip install streamlit openai`
+
+
+
+---
+
+## Phase 2: Code Iterations & Terminal Troubleshooting
+
+Building an application requires active command-line manipulation. We chose to bypass visual text editors and program the application directly through the shell engine using **Nano** (a terminal-native text editor).
+
+### The Code Workspace Evolution (3 Code Migrations)
+
+#### Iteration 1: The Raw Blueprint
+
+The initial design was architected to communicate exclusively with the OpenAI engine. It introduced user-facing input spaces for incident logs, metrics payloads, and an authentication barrier.
+
+#### Iteration 2: The Markdown Conflict
+
+* **The Error Encountered:** Upon executing the script, the browser threw a fatal compilation block:
+> `SyntaxError: invalid decimal literal`
+
+
+* **The Diagnosis:** During the copy-paste process inside the terminal text editor, raw markdown structural strings from the repository documentation accidentally bled into the active Python interpreter file. The compiler tried to execute text metadata (`*  AI Orchestration...`) as program commands.
+* **The Terminal Fix:** 1. Isolated the running web process using the global interrupt signal: `Control + C`.
+2. Re-opened the configuration sheet: `nano app.py`.
+3. Purged the contaminated file lines using the terminal truncation shortcut: `Control + K`.
+4. Patched the system with zero-overhead, clean Python syntax.
+
+#### Iteration 3: The Ecosystem Adaptation
+
+* **The Error Encountered:** `bash: streamlit: command not found`
+* **The Diagnosis:** The operating system shell did not map the standalone `streamlit` path shortcut into the system profile binary files.
+* **The Fix:** Executed the application server via the explicit Python module compiler wrapper:
+```bash
+python3 -m streamlit run app.py
+
+```
+
+
+
+---
+
+## Phase 3: The API Authentication Journey (The 3 Keys)
+
+The most significant architectural layer of this project was setting up the upstream AI processing engine. We explored three separate paradigms, dealing with pricing mechanics, local hardware constraints, and production model deprecation.
+
+### The Core Paradigm: Why Input the Key via UI?
+
+> **Security Best Practice:** Hardcoding keys or structural authorization passwords directly into source code repos is a catastrophic security vulnerability. If pushed to public GitHub files, scraping bots will steal them within seconds. By collecting the key dynamically using Streamlit's `st.sidebar.text_input(type="password")`, the token lives purely in short-term local browser memory and is never exposed in the source code.
+
+```
+       [ Local Browser Session ]
+                   │
+         (Enter API Key in UI)
+                   │
+                   ▼
+  [ Streamlit app.py Engine (Local) ]
+                   │
+     (Transmits Payload + Key via HTTPS)
+                   │
+                   ▼
+       [ Cloud LLM Endpoint API ]
+
+```
+
+| Attempt | Target Model / Engine | Authentication Method | Result / Error Faced | Resolution & Architectural Lesson |
+| --- | --- | --- | --- | --- |
+| **1** | OpenAI `gpt-4o-mini` | Developer Secret Token (`sk-...`) | **Error 429: Insufficient Quota** | **Lesson:** Monthly consumer subscriptions (ChatGPT Plus) are entirely separated from developer API programmatic access. The API is pay-as-you-go and requires independent credit allocations. |
+| **2** | Ollama (Local `llama3`) | Decoupled Localhost Loop (`http://localhost:11434`) | **Hardware/Resource Constraints** | **Lesson:** Local LLMs offer free, fully private data compliance, but require massive local CPU/GPU resource overhead and storage limits that can throttle execution speed. |
+| **3** | Google AI Studio `gemini-1.5-flash` | Free Tier Cloud Token | **Error 404: Model Not Found** | **Lesson:** Cloud models are constantly under active lifecycle management. Passing an outdated string name calls an endpoint that has been deprecated or moved by the provider. |
+| **Final** | Google AI Studio `gemini-3.5-flash` | Free Tier Cloud Token | **Success (201 Created)** | Successfully generated complete, professional Markdown RCA documents using a free tier, enterprise cloud engine. |
+
+---
+
+## Reference Manual: Commands & Terminology
+
+### 1. System Engineering Glossary
+
+* **SRE (Site Reliability Engineering):** A discipline that incorporates software engineering aspects into information technology operations problems to build highly scalable and reliable software systems.
+* **RCA (Root Cause Analysis):** A structured problem-solving method used to identify the exact technical failure point that triggered an outage, preventing recurrence.
+* **MTTR (Mean Time to Repair):** The average time required to troubleshoot, fix, and restore a failed system component to active service.
+* **API (Application Programming Interface):** A software intermediary that allows two separate programs (e.g., your local web tool and Google's AI brain) to safely speak to each other.
+* **Endpoint / Base URL:** The explicit web address where a web service lives and listens for incoming programmatic requests.
+
+### 2. Linux & Command-Line Cheat Sheet
+
+| Command | Action Performed | Context in This Project |
+| --- | --- | --- |
+| `cd [directory]` | Changes current shell directory path. | Navigated directly into the `ai-rca-generator` folder. |
+| `ls` | Lists files in the current folder path. | Confirmed `app.py` was saved in the right spot. |
+| `nano [file]` | Opens terminal-native text editor. | Created and altered the source code sheets directly. |
+| `Control + C` | Sends an interrupt signal (SIGINT). | Killed the running Streamlit server to free up the command line. |
+| `Control + K` | Cuts/Deletes an entire line of text inside Nano. | Cleared out the corrupted syntax markdown code instantly. |
+| `Control + O` | Writes out (Saves) changes inside Nano. | Saved the code into the physical storage blocks. |
+| `Control + X` | Exits the Nano application interface. | Safely returned to the active terminal prompt loop. |
+
+---
+
+## Final Clean Production Code
+
+This is the verified, exact production code currently running on the local architecture and safely pushed to the cloud GitHub repository:
+
+```python
+import streamlit as st
+from openai import OpenAI
+
+# 1. Setup the Web Page Title and Design
+st.set_page_config(page_title="AI Root Cause Analysis Generator", page_icon="⚙️")
+st.title("📟 AI Root Cause Analysis (RCA) Generator")
+st.write("Paste your raw logs and system metrics below to instantly generate a professional SRE Incident Report.")
+
+# 2. Add an Input Box for the User's Google Gemini API Key
+api_key = st.sidebar.text_input("Enter your Gemini API Key", type="password")
+
+# 3. Create the Main Inputs on the Screen
+incident_title = st.text_input("Incident Title", placeholder="e.g., Payment Gateway 500 Errors")
+raw_data = st.text_area("Paste System Logs / Metrics Here", height=200, placeholder="Paste raw error codes, CPU spikes, or application logs...")
+
+# 4. Create the "Magic" Button
+if st.button("Generate RCA Report"):
+    if not api_key:
+        st.error("Please enter your Gemini API Key in the sidebar to proceed.")
+    elif not raw_data:
+        st.warning("Please paste some log or metric data first.")
+    else:
+        with st.spinner("Analyzing data and generating report..."):
+            try:
+                # Connect to Google's Free Cloud Engine using OpenAI's format
+                client = OpenAI(
+                    api_key=api_key,
+                    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+                )
+                
+                # Formulate the instructions for the AI
+                system_instruction = (
+                    "You are an expert Principal Site Reliability Engineer (SRE). "
+                    "Analyze the provided logs/metrics and generate a highly professional "
+                    "Root Cause Analysis (RCA) report in Markdown format. Include sections for: "
+                    "Executive Summary, Incident Timeline Hypothesis, Root Cause Determination, and Short/Long-term Preventative Actions."
+                )
+                
+                # Send the data to the modern, active Gemini model
+                response = client.chat.completions.create(
+                    model="gemini-3.5-flash",
+                    messages=[
+                        {"role": "system", "content": system_instruction},
+                        {"role": "user", "content": f"Incident: {incident_title}\n\nData:\n{raw_data}"}
+                    ],
+                    temperature=0.2
+                )
+                
+                # Display the result beautifully on the screen
+                st.success("RCA Report Generated Successfully!")
+                st.markdown("---")
+                st.markdown(response.choices[0].message.content)
+                
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
+
+```
